@@ -1,23 +1,24 @@
 package io.swagger.codegen;
 
-import com.samskivert.mustache.Mustache;
-import com.samskivert.mustache.Template;
 import io.swagger.codegen.ignore.CodegenIgnoreProcessor;
 import io.swagger.codegen.languages.AbstractJavaCodegen;
 import io.swagger.codegen.utils.ImplementationVersion;
+import io.swagger.codegen.languages.AbstractJavaCodegen;
+import io.swagger.codegen.template.TemplateEngine;
+import io.swagger.codegen.template.MultiTemplateEngine;
 import io.swagger.models.*;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.util.Json;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class DefaultGenerator extends AbstractGenerator implements Generator {
@@ -32,6 +33,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
     private Boolean generateApiTests = null;
     private Boolean generateApiDocumentation = null;
     private Boolean generateModelTests = null;
+    private TemplateEngine templateEngine = null;
     private Boolean generateModelDocumentation = null;
     private Boolean generateSwaggerMetadata = true;
     private String basePath;
@@ -178,6 +180,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
         basePath = config.escapeText(getHost());
         basePathWithoutHost = config.escapeText(swagger.getBasePath());
 
+        templateEngine = new MultiTemplateEngine(config);
     }
 
     private void configureSwaggerInfo() {
@@ -571,12 +574,6 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
                     LOGGER.info("Skipped overwriting " + outputFilename);
                     continue;
                 }
-                String templateFile;
-                if (support instanceof GlobalSupportingFile) {
-                    templateFile = config.getCommonTemplateDir() + File.separator + support.templateFile;
-                } else {
-                    templateFile = getFullTemplateFile(config, support.templateFile);
-                }
                 boolean shouldGenerate = true;
                 if (supportingFilesToGenerate != null && !supportingFilesToGenerate.isEmpty()) {
                     shouldGenerate = supportingFilesToGenerate.contains(support.destinationFilename);
@@ -585,45 +582,8 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
                     continue;
                 }
 
-                if (ignoreProcessor.allowsFile(new File(outputFilename))) {
-                    if (templateFile.endsWith("mustache")) {
-                        String template = readTemplate(templateFile);
-                        Mustache.Compiler compiler = Mustache.compiler();
-                        compiler = config.processCompiler(compiler);
-                        Template tmpl = compiler
-                                .withLoader(new Mustache.TemplateLoader() {
-                                    @Override
-                                    public Reader getTemplate(String name) {
-                                        return getTemplateReader(getFullTemplateFile(config, name + ".mustache"));
-                                    }
-                                })
-                                .defaultValue("")
-                                .compile(template);
-
-                        writeToFile(outputFilename, tmpl.execute(bundle));
-                        files.add(new File(outputFilename));
-                    } else {
-                        InputStream in = null;
-
-                        try {
-                            in = new FileInputStream(templateFile);
-                        } catch (Exception e) {
-                            // continue
-                        }
-                        if (in == null) {
-                            in = this.getClass().getClassLoader().getResourceAsStream(getCPResourcePath(templateFile));
-                        }
-                        File outputFile = new File(outputFilename);
-                        OutputStream out = new FileOutputStream(outputFile, false);
-                        if (in != null) {
-                            LOGGER.info("writing file " + outputFile);
-                            IOUtils.copy(in, out);
-                            out.close();
-                        } else {
-                            LOGGER.error("can't open " + templateFile + " for input");
-                        }
-                        files.add(outputFile);
-                    }
+                if(ignoreProcessor.allowsFile(new File(outputFilename))) {
+                    files.add(processTemplateToFile(bundle, support.templateFile, outputFilename));
                 } else {
                     LOGGER.info("Skipped generation of " + outputFilename + " due to rule in .swagger-codegen-ignore");
                 }
@@ -756,21 +716,8 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
     private File processTemplateToFile(Map<String, Object> templateData, String templateName, String outputFilename) throws IOException {
         String adjustedOutputFilename = outputFilename.replaceAll("//", "/").replace('/', File.separatorChar);
         if (ignoreProcessor.allowsFile(new File(adjustedOutputFilename))) {
-            String templateFile = getFullTemplateFile(config, templateName);
-            String template = readTemplate(templateFile);
-            Mustache.Compiler compiler = Mustache.compiler();
-            compiler = config.processCompiler(compiler);
-            Template tmpl = compiler
-                    .withLoader(new Mustache.TemplateLoader() {
-                        @Override
-                        public Reader getTemplate(String name) {
-                            return getTemplateReader(getFullTemplateFile(config, name + ".mustache"));
-                        }
-                    })
-                    .defaultValue("")
-                    .compile(template);
-
-            writeToFile(adjustedOutputFilename, tmpl.execute(templateData));
+            final String renderedTemplate = templateEngine.renderTemplate(templateName, templateData);
+            writeToFile(adjustedOutputFilename, renderedTemplate);
             return new File(adjustedOutputFilename);
         }
 

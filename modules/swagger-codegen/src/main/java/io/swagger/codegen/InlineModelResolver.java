@@ -432,9 +432,9 @@ public class InlineModelResolver {
     /**
      * Make a RefProperty
      *
-     * @param ref new property name
-     * @param property Property
-     * @return
+     * @param ref reference name
+     * @param property property
+     * @return reference property
      */
     public Property makeRefProperty(String ref, Property property) {
         RefProperty newProperty = new RefProperty(ref);

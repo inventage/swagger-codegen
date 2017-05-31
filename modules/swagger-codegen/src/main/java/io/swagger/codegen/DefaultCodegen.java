@@ -464,11 +464,7 @@ public class DefaultCodegen {
     }
 
     public String embeddedTemplateDir() {
-        if (embeddedTemplateDir != null) {
-            return embeddedTemplateDir;
-        } else {
-            return templateDir;
-        }
+        return embeddedTemplateDir;
     }
 
     public String getCommonTemplateDir() {

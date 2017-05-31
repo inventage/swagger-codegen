@@ -125,6 +125,7 @@ public interface CodegenConfig {
 
     void processSwagger(Swagger swagger);
 
+    @Deprecated
     Compiler processCompiler(Compiler compiler);
 
     String sanitizeTag(String tag);
