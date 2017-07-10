@@ -5,8 +5,8 @@
         <version>5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.swagger</groupId>
-    <artifactId>swagger-codegen-project</artifactId>
+    <groupId>io.swagger.inventage</groupId>
+    <artifactId>inventage-swagger-codegen-project</artifactId>
     <packaging>pom</packaging>
     <name>swagger-codegen-project</name>
     <version>2.3.0</version>
@@ -329,7 +329,7 @@
             <activation>
                 <property>
                     <name>env</name>
-                    <value>java</value>
+                    <value>jjava</value>
                 </property>
             </activation>
             <modules>
