@@ -4,7 +4,7 @@
   <artifactId>swagger-jaxrs-jersey1-server</artifactId>
   <packaging>jar</packaging>
   <name>swagger-jaxrs-jersey1-server</name>
-  <version>1.0.0</version>
+  <version>1.0.0-SNAPSHOT</version>
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
     <plugins>

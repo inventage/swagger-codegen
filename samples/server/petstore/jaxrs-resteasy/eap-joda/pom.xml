@@ -5,7 +5,7 @@
     <artifactId>swagger-jaxrs-resteasy-eap-joda-server</artifactId>
     <packaging>war</packaging>
     <name>swagger-jaxrs-resteasy-eap-joda-server</name>
-    <version>1.0.0</version>
+    <version>1.0.0-SNAPSHOT</version>
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
         <plugins>

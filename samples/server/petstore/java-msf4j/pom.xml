@@ -9,7 +9,7 @@
   <artifactId>swagger-msf4j-server</artifactId>
   <packaging>jar</packaging>
   <name>swagger-msf4j-server</name>
-  <version>1.0.0</version>
+  <version>1.0.0-SNAPSHOT</version>
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
     <plugins>

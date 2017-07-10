@@ -949,4 +949,11 @@
         <reflections-version>0.9.10</reflections-version>
         <handlebars-version>4.0.6</handlebars-version>
     </properties>
+    <distributionManagement>
+        <repository>
+            <name>Projectware Repository</name>
+            <id>inventage-projectware</id>
+            <url>https://nexus.inventage.com/content/groups/projectware</url>
+        </repository>
+    </distributionManagement>
 </project>

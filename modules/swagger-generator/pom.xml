@@ -137,13 +137,13 @@
             <version>${swagger-core-version}</version>
         </dependency>
         <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-codegen</artifactId>
+            <groupId>io.swagger.inventage</groupId>
+            <artifactId>inventage-swagger-codegen</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-codegen</artifactId>
+            <groupId>io.swagger.inventage</groupId>
+            <artifactId>inventage-swagger-codegen</artifactId>
             <version>${project.parent.version}</version>
             <type>test-jar</type>
             <scope>test</scope>

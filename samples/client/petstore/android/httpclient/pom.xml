@@ -5,7 +5,7 @@
   <artifactId>swagger-android-client</artifactId>
   <packaging>jar</packaging>
   <name>swagger-android-client</name>
-  <version>1.0.0</version>
+  <version>1.0.0-SNAPSHOT</version>
   <scm>
     <connection>scm:git:git@github.com:swagger-api/swagger-mustache.git</connection>
     <developerConnection>scm:git:git@github.com:swagger-api/swagger-codegen.git</developerConnection>

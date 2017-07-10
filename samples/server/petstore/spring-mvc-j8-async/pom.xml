@@ -4,7 +4,7 @@
     <artifactId>swagger-spring-mvc-server-j8-async</artifactId>
     <packaging>jar</packaging>
     <name>swagger-spring-mvc-server-j8-async</name>
-    <version>1.0.0</version>
+    <version>1.0.0-SNAPSHOT</version>
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
         <plugins>

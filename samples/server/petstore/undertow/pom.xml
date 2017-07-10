@@ -9,7 +9,7 @@
     <artifactId>swagger-undertow-server</artifactId>
     <packaging>jar</packaging>
     <name>swagger-undertow-server</name>
-    <version>1.0.0</version>
+    <version>1.0.0-SNAPSHOT</version>
     <prerequisites>
         <maven>2.2.0</maven>
     </prerequisites>

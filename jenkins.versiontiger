@@ -1,0 +1,5 @@
+# Universe definition
+projectRoot .
+
+setting osgi.version.mapping suffixToQualifier
+releaseWithSuffix .* ${BUILD_NUMBER}

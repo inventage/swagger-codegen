@@ -46,8 +46,8 @@
             <version>3.4</version>
         </dependency>
         <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-codegen</artifactId>
+            <groupId>io.swagger.inventage</groupId>
+            <artifactId>inventage-swagger-codegen</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
