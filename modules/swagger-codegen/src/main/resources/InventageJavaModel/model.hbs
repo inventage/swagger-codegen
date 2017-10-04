@@ -1,0 +1,23 @@
+package {{package}};
+
+{{#imports}}
+import {{import}};
+{{/imports}}
+
+{{#each models}}
+    {{#with model}}
+/**
+ * {{#description}}{{.}}{{/description}}{{^description}}{{classname}}{{/description}}
+ */
+        {{#if isEnum}}
+{{>enumOuterClass}}
+        {{/if}}
+        {{#unless isEnum}}
+            {{#equals "String" dataType}}
+{{>stringWrapper}}
+{{else ~}}
+{{>pojo}}
+            {{/equals}}
+        {{/unless}}
+    {{/with}}
+{{/each}}
