@@ -2,12 +2,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.swagger.inventage</groupId>
-        <artifactId>inventage-swagger-codegen-project</artifactId>
-        <version>2.3.0-SNAPSHOT</version>
+        <groupId>io.swagger</groupId>
+        <artifactId>swagger-codegen-project</artifactId>
+        <version>2.3.0.inventage-1-SNAPSHOT</version>
         <relativePath>../..</relativePath>
     </parent>
-    <artifactId>inventage-swagger-generator</artifactId>
+    <artifactId>swagger-generator</artifactId>
     <packaging>war</packaging>
     <name>swagger-generator</name>
     <build>
@@ -137,13 +137,13 @@
             <version>${swagger-core-version}</version>
         </dependency>
         <dependency>
-            <groupId>io.swagger.inventage</groupId>
-            <artifactId>inventage-swagger-codegen</artifactId>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-codegen</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.swagger.inventage</groupId>
-            <artifactId>inventage-swagger-codegen</artifactId>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-codegen</artifactId>
             <version>${project.parent.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
