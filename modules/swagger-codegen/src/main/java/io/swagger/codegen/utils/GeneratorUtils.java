@@ -160,7 +160,7 @@ public final class GeneratorUtils {
      * @param swagger Swagger definition
      * @return the short app name
      */
-    /* package private */ static String extractShortAppName(Map<String, Object> additionalProperties, Swagger swagger) {
+    public static String extractShortAppName(Map<String, Object> additionalProperties, Swagger swagger) {
         final Object configuredShortAppName = swagger.getInfo().getVendorExtensions().get("x-short-name");
         final String serviceEndpointName;
         if (configuredShortAppName instanceof String) {

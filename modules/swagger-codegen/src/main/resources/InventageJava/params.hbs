@@ -1,0 +1,18 @@
+{{#each pathParams ~}}
+{{>pathParams}}{{#unless @last}}, {{/unless}}
+{{~/each}}
+{{~#if hasPathParams ~}}
+    {{#if hasQueryParams ~}}, {{/if}}
+{{~/if}}
+{{~#each queryParams ~}}
+{{>queryParams}}{{#unless @last}}, {{/unless}}
+{{~/each}}
+{{~#if hasBodyParam ~}}
+    {{#if hasQueryParams}}, {{/if ~}}
+    {{#unless hasQueryParams ~}}
+        {{#if hasPathParams}}, {{/if}}
+    {{~/unless~}}
+    {{#with bodyParam}}
+{{>bodyParams}}
+    {{/with}}
+{{~/if~}}

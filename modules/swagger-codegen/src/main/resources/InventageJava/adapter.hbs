@@ -1,0 +1,75 @@
+package {{package}};
+
+{{# if matrixParameters}}
+import static {{apiPackage}}.MatrixParameterUtils.matrixParameter;
+import static {{apiPackage}}.MatrixParameterUtils.matrixBaseParameter;
+{{/if}}
+
+{{#each imports}}import {{import}};
+{{/each}}
+
+import java.util.List;
+{{#with operations}}
+{{#each operation}}
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.Path;
+{{#if hasPathParams}}
+import javax.ws.rs.PathParam;
+{{/if}}
+{{#if hasQueryParams}}
+import javax.ws.rs.QueryParam;
+{{/if}}
+import javax.ws.rs.Produces;
+
+/**
+ * Resource adapter for the {{operationId}} operation.
+ *
+ * {{#if notes}}<p>{{notes}}</p>
+ *
+ * {{/if}}<p>Path: {{path}}</p>
+ */
+@ApplicationScoped
+@Path("{{path}}")
+{{#hasConsumes}}@Consumes({ {{#consumes}}"{{mediaType}}"{{#hasMore}}, {{/hasMore}}{{/consumes}} }){{/hasConsumes}}
+{{#hasProduces}}@Produces({ {{#produces}}"{{mediaType}}"{{#hasMore}}, {{/hasMore}}{{/produces}} }){{/hasProduces}}
+public class {{classname}}Adapter {
+
+    //---- Fields
+
+    @Inject
+    private {{classname}} implementation;
+
+
+    //---- Methods
+
+    /**
+     * {{#notes}}{{notes}}
+     *
+     * <br>{{/notes}}Path: {{path}}
+     *
+     {{> paramDoc adapter=true}}
+     */
+    @{{httpMethod}}
+    public {{#if returnType}}{{{returnType}}}{{else}}void{{/if}} {{operationId}}({{> params annotated=true types=true}}) {
+        {{#each pathParams}}
+            {{#with vendorExtensions.complexType}}
+        final {{ref}} {{baseName}} = {{ref}}.builder()
+                .{{baseProperty}}(matrixBaseParameter({{paramName}}PathSegment
+                {{~#equals "String" basePropertyType}}{{else}}, {{basePropertyType}}.class{{/equals}}))
+                {{#each properties}}
+                .{{property}}(matrixParameter({{paramName}}PathSegment, "{{key}}"
+                {{~#equals "String" type}}{{else}}, {{type}}.class{{/equals}}))
+                {{/each}}
+                .build();
+            {{/with}}
+        {{/each}}
+        {{#equals "void" returnType}}{{else}}return {{/equals}}implementation.{{operationId}}({{> params}});
+    }
+
+}
+{{/each}}
+{{/with}}
+

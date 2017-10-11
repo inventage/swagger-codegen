@@ -1,0 +1,8 @@
+{{#if isQueryParam ~}}
+    {{#if annotated ~}}
+        @QueryParam("{{baseName}}")
+        {{~#if useBeanValidation~}}
+{{>apiBeanValidationQueryParams}}
+        {{~/if}} {{/if ~}}
+    {{#if types}}{{#if isEnum}} {{{datatypeWithEnum}}}{{else}} {{{dataType}}}{{/if}} {{/if}}{{paramName}}
+{{~/if~}}

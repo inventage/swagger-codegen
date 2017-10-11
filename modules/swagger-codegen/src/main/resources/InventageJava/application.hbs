@@ -1,0 +1,56 @@
+package {{apiPackage}};
+
+import static com.google.common.collect.Sets.newHashSet;
+
+import javax.annotation.Generated;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.ws.rs.core.Application;
+import javax.ws.rs.ApplicationPath;
+import java.util.Set;
+
+{{#imports}}import {{import}};
+{{/imports}}
+
+/**
+ * {{appName}} JAX-RS application.
+ *
+ * <p>To function correctly, the following resource interfaces
+ * need to be implemented:</p>
+ * <ul>
+{{#apiInfo}}
+    {{#apis}}
+ *   <li>{@link {{classname}} }</li>
+    {{/apis}}
+{{/apiInfo}}
+ * </ul>
+ *
+ * <p>The {@code {{shortAppName}}ApplicationImplementationsTest} ensures, that at least one implementation of each of these interfaces is available.</p>
+ *
+ * @author Simon Marti
+ */
+@Generated("swagger-codegen")
+@ApplicationScoped
+@ApplicationPath("{{#if contextPath}}{{contextPath}}{{else}}/{{/if}}")
+public class {{shortAppName}}Application extends Application {
+
+    //---- Methods
+
+    @Override
+    public Set<Class<?>> getClasses() {
+        return newHashSet(
+            // Application resources
+    {{#apiInfo}}
+        {{#apis}}
+            {{classname}}Adapter.class{{#unless @last}},{{/unless}}
+        {{/apis}}
+    {{/apiInfo}}
+{{#unless swaggerFileApplication}}
+
+    // Swagger file resource
+    configuration.addResource(SwaggerFileResource.class);
+{{/unless}}
+        );
+    }
+
+}
