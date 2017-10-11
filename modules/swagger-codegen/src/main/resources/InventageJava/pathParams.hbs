@@ -1,6 +1,6 @@
 {{#if isPathParam ~}}
     {{#if annotated~}}
-        @PathParam("{{baseName}}") {{#unless vendorExtensions.complexType}}{{#if useBeanValidation}}{{>apiBeanValidationPathParams}}{{/if}}{{/unless~}}
+        {{#if jaxrs}}@PathParam("{{baseName}}"){{/if}}{{#if spring}}@PathVariable("{{baseName}}"){{/if}} {{#unless vendorExtensions.complexType}}{{#if useBeanValidation}}{{>apiBeanValidationPathParams}}{{/if}}{{/unless~}}
         {{#if vendorExtensions.complexType}}PathSegment {{paramName}}PathSegment{{else}}{{#if isEnum}}{{datatypeWithEnum}}{{else}}{{{dataType}}}{{/if}} {{paramName}}{{/if}}
     {{~/if~}}
     {{#unless annotated~}}

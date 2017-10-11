@@ -4,7 +4,6 @@ import io.swagger.codegen.*;
 import io.swagger.codegen.utils.GeneratorUtils;
 import io.swagger.models.Model;
 import io.swagger.models.Operation;
-import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.properties.ArrayProperty;
@@ -14,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.util.*;
 
 import static io.swagger.codegen.utils.GeneratorUtils.*;
@@ -23,11 +21,14 @@ import static java.lang.Math.abs;
 
 
 @SuppressWarnings("Duplicates")
-public class InventageJavaCodegen extends AbstractJavaCodegen {
+public class InventageJavaCodegen extends AbstractJavaJAXRSServerCodegen {
 
     //---- Static
 
     private static final Logger LOG = LoggerFactory.getLogger(InventageJavaCodegen.class);
+
+    private static final String JAX_RS = "jax-rs";
+    private static final String SPRING = "spring";
 
 
     //---- Constructor
@@ -43,6 +44,14 @@ public class InventageJavaCodegen extends AbstractJavaCodegen {
         artifactId = "inventage-java-api";
         apiPackage = "com.inventage.example.api";
         modelPackage = "com.inventage.example.model";
+
+        supportedLibraries.put(JAX_RS, "Java EE 7 JAX-RS Server stub");
+        supportedLibraries.put(SPRING, "Spring Server stub");
+
+        final CliOption libraryOption = new CliOption(CodegenConstants.LIBRARY, "library template (sub-template) to use");
+        libraryOption.setEnum(supportedLibraries);
+        libraryOption.setDefault(JAX_RS);
+        cliOptions.add(libraryOption);
     }
 
 
@@ -88,6 +97,13 @@ public class InventageJavaCodegen extends AbstractJavaCodegen {
         apiTemplateFiles.clear();
         apiTestTemplateFiles.clear();
 
+        if (JAX_RS.equals(getLibrary())) {
+            additionalProperties.put("jaxrs", "true");
+        }
+        else if (SPRING.equals(getLibrary())) {
+            additionalProperties.put("spring", "true");
+        }
+
         additionalProperties.put("jackson", "true");
         additionalProperties.put("useBeanValidation", "true");
 
@@ -129,41 +145,12 @@ public class InventageJavaCodegen extends AbstractJavaCodegen {
     public void preprocessSwagger(Swagger swagger) {
         super.preprocessSwagger(swagger);
 
-        if ( "/".equals(swagger.getBasePath()) ) {
-            swagger.setBasePath("");
-        }
-
-        if ( swagger.getPaths() != null ) {
-            for ( String pathname : swagger.getPaths().keySet() ) {
-                Path path = swagger.getPath(pathname);
-                if ( path.getOperations() != null ) {
-                    for ( Operation operation : path.getOperations() ) {
-                        if ( operation.getTags() != null ) {
-                            List<Map<String, String>> tags = new ArrayList<Map<String, String>>();
-                            for ( String tag : operation.getTags() ) {
-                                Map<String, String> value = new HashMap<String, String>();
-                                value.put("tag", tag);
-                                value.put("hasMore", "true");
-                                tags.add(value);
-                            }
-                            if ( tags.size() > 0 ) {
-                                tags.get(tags.size() - 1).remove("hasMore");
-                            }
-                            if ( operation.getTags().size() > 0 ) {
-                                String tag = operation.getTags().get(0);
-                                operation.setTags(Arrays.asList(tag));
-                            }
-                            operation.setVendorExtension("x-tags", tags);
-                        }
-                    }
-                }
-            }
-        }
-
         final String shortAppName = GeneratorUtils.extractShortAppName(additionalProperties, swagger);
 
         final String apiFolder = sourceFolder + File.separator + apiPackage.replace('.', '/');
-        supportingFiles.add(new SupportingFile("application", apiFolder, shortAppName + "Application.java"));
+        if (JAX_RS.equals(getLibrary())) {
+            supportingFiles.add(new SupportingFile("application", apiFolder, shortAppName + "Application.java"));
+        }
 
         additionalProperties.put("swaggerFileApplication", true);
         /*
@@ -371,89 +358,25 @@ public class InventageJavaCodegen extends AbstractJavaCodegen {
     /** {@inheritDoc} */
     @Override
     public Map<String, Object> postProcessOperations(Map<String, Object> objs) {
+        final Map<String, Object> newObjs = super.postProcessOperations(objs);
         Map<String, Object> operations = (Map<String, Object>) objs.get("operations");
-        if ( operations != null ) {
-            @SuppressWarnings("unchecked")
-            List<CodegenOperation> ops = (List<CodegenOperation>) operations.get("operation");
-            for ( CodegenOperation operation : ops ) {
-                if (operation.hasConsumes == Boolean.TRUE) {
-                    Map<String, String> firstType = operation.consumes.get(0);
-                    if (firstType != null) {
-                        if ("multipart/form-data".equals(firstType.get("mediaType"))) {
-                            operation.isMultipart = Boolean.TRUE;
-                        }
-                    }
-                }
-
-                boolean isMultipartPost = false;
-                List<Map<String, String>> consumes = operation.consumes;
-                if(consumes != null) {
-                    for(Map<String, String> consume : consumes) {
-                        String mt = consume.get("mediaType");
-                        if(mt != null) {
-                            if(mt.startsWith("multipart/form-data")) {
-                                isMultipartPost = true;
-                            }
-                        }
-                    }
-                }
-
-                for(CodegenParameter parameter : operation.allParams) {
-                    if(isMultipartPost) {
-                        parameter.vendorExtensions.put("x-multipart", "true");
-                    }
-                }
-
-                List<CodegenResponse> responses = operation.responses;
-                if ( responses != null ) {
-                    for ( CodegenResponse resp : responses ) {
-                        if ( "0".equals(resp.code) ) {
-                            resp.code = "200";
-                        }
-
-                        if (resp.baseType == null) {
-                            resp.dataType = "void";
-                            resp.baseType = "Void";
-                            // set vendorExtensions.x-java-is-response-void to true as baseType is set to "Void"
-                            resp.vendorExtensions.put("x-java-is-response-void", true);
-                        }
-
-                        if ("array".equals(resp.containerType)) {
-                            resp.containerType = "List";
-                        } else if ("map".equals(resp.containerType)) {
-                            resp.containerType = "Map";
-                        }
-                    }
-                }
-
-                if ( operation.returnBaseType == null ) {
-                    operation.returnType = "void";
-                    operation.returnBaseType = "Void";
-                    // set vendorExtensions.x-java-is-response-void to true as returnBaseType is set to "Void"
-                    operation.vendorExtensions.put("x-java-is-response-void", true);
-                }
-
-                if ("array".equals(operation.returnContainer)) {
-                    operation.returnContainer = "List";
-                } else if ("map".equals(operation.returnContainer)) {
-                    operation.returnContainer = "Map";
-                }
-            }
-        }
 
         if (operations != null) {
-            final List<LinkedHashMap> imports = (List<LinkedHashMap>) objs.get("imports");
+            final List<LinkedHashMap> imports = (List<LinkedHashMap>) newObjs.get("imports");
             final List<CodegenOperation> ops = (List<CodegenOperation>) operations.get("operation");
             for (final CodegenOperation operation : ops) {
                 LOG.info("Found: " + operation.httpMethod + " in " + operation);
 
-                addImport(operation.httpMethod.toUpperCase(Locale.US), imports);
+                if (JAX_RS.equals(getLibrary())) {
+                    addImport(operation.httpMethod.toUpperCase(Locale.US), imports);
+                }
                 importsForParamValidation(operation.pathParams, imports);
                 importsForParamValidation(operation.queryParams, imports);
                 importsForParamValidation(operation.bodyParams, imports);
             }
         }
-        return objs;
+
+        return newObjs;
     }
 
     /** {@inheritDoc} */
