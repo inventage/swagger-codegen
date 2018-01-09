@@ -44,7 +44,9 @@ import org.springframework.validation.annotation.Validated;
 /**
  * Resource adapter for the {{operationId}} operation.
  *
- * {{#if notes}}<p>{{notes}}</p>
+ * {{#if summary}}<p>{{summary}}</p>
+ *
+ * {{/if}}{{#if notes}}{{#if sumnary}}<p>{{/if}}{{notes}}{{#if sumnary}}</p>{{/if}}
  *
  * {{/if}}<p>Path: {{path}}</p>
  */
@@ -74,9 +76,11 @@ public class {{classname}}Adapter {
     //---- Methods
 
     /**
-     * {{#notes}}{{notes}}
+     * {{#if summary}}{{summary}}
      *
-     * <br>{{/notes}}Path: {{path}}
+     * {{/if}}{{#if notes}}{{#if sumnary}}<p>{{/if}}{{notes}}{{#if sumnary}}</p>{{/if}}
+     *
+     * {{/if}}<p>Path: {{path}}</p>
      *
      {{> paramDoc adapter=true}}
      */
@@ -111,4 +115,3 @@ public class {{classname}}Adapter {
 }
 {{/each}}
 {{/with}}
-

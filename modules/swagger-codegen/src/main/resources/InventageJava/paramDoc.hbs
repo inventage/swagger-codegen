@@ -10,4 +10,6 @@
 {{#each bodyParams}}
 {{> param}}
 {{/each}}
-{{#equals "void" returnType}}{{else}}* @return response DTO{{/equals}}
+{{~#equals "void" returnType~}}{{~else}}
+* @return response DTO
+{{/equals~}}

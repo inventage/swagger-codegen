@@ -186,7 +186,6 @@ public class {{classname}} {{#if parent}}extends {{{parent}}} {{/if}}{{#if seria
      */
     {{/if}}
     public {{{datatypeWithEnum}}} {{getter}}() { return {{name}}; }
-{{#unless isReadOnly}}
 
     {{#if description}}
     /**
@@ -228,7 +227,6 @@ public class {{classname}} {{#if parent}}extends {{{parent}}} {{/if}}{{#if seria
         return this;
     }
     {{/if}}
-{{/unless}}
 
 {{/each}}
 

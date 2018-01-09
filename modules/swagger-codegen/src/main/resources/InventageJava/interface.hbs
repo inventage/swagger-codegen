@@ -22,9 +22,11 @@ import java.util.List;
 public interface {{classname}} {
 
     /**
-     * {{#if notes}}{{notes}}
+     * {{#if summary}}{{summary}}
      *
-     * <p>{{/if}}Path: {{path}}{{#if notes}}</p>{{/if}}
+     * {{/if}}{{#if notes}}{{#if sumnary}}<p>{{/if}}{{notes}}{{#if sumnary}}</p>{{/if}}
+     *
+     * {{/if}}<p>Path: {{path}}</p>
      *
      {{> paramDoc}}
      */

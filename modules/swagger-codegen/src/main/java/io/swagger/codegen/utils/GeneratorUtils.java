@@ -120,6 +120,21 @@ public final class GeneratorUtils {
     }
 
     /**
+     * Group all operations into a single group named {@code "global"}.
+     *
+     * @param tag tag for operation
+     * @param resourcePath full URL for operation
+     * @param operation operation Swagger definition
+     * @param codegenOperation operation data used for code generation
+     * @param operationGroups existing groups of operations (will be modified by this method)
+     */
+    public static void groupOperationsIntoSingleGroup(String tag, String resourcePath, Operation operation, CodegenOperation codegenOperation,
+                                                    Map<String, List<CodegenOperation>> operationGroups) {
+
+        operationGroups.computeIfAbsent("global", key -> new ArrayList<>()).add(codegenOperation);
+    }
+
+    /**
      * Returns path to the .swagger-codegen-ignore file.
      *
      * @param outputFolder output folder of the Swagger code generator
@@ -139,7 +154,7 @@ public final class GeneratorUtils {
      * @return {@code string} in camel-case
      */
     public static String camelizeSpacedString(String string) {
-        final String strippedName = string.toLowerCase(Locale.US).replaceAll("[^a-zA-Z]", "");
+        final String strippedName = string.toLowerCase(Locale.US).replaceAll("[^a-zA-Z ]", "");
         final Matcher matcher = Pattern.compile("\\s+(\\w)").matcher(strippedName);
 
         final StringBuffer result = new StringBuffer();

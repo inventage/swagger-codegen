@@ -20,15 +20,20 @@ import static java.lang.Character.isUpperCase;
 import static java.lang.Math.abs;
 
 
+/**
+ * Generates a JAX-RS or Spring server stub.
+ *
+ * @author Simon Marti
+ */
 @SuppressWarnings("Duplicates")
-public class InventageJavaCodegen extends AbstractJavaJAXRSServerCodegen {
+public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
 
     //---- Static
 
-    private static final Logger LOG = LoggerFactory.getLogger(InventageJavaCodegen.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InventageJavaServerCodegen.class);
 
-    private static final String JAX_RS = "jax-rs";
-    private static final String SPRING = "spring";
+    protected static final String JAX_RS = "jax-rs";
+    protected static final String SPRING = "spring";
 
 
     //---- Constructor
@@ -36,7 +41,7 @@ public class InventageJavaCodegen extends AbstractJavaJAXRSServerCodegen {
     /**
      * Creates a new instance.
      */
-    public InventageJavaCodegen() {
+    public InventageJavaServerCodegen() {
         super();
         outputFolder = "generated-code" + File.separator + "java";
         embeddedTemplateDir = templateDir = "InventageJava";
@@ -58,6 +63,7 @@ public class InventageJavaCodegen extends AbstractJavaJAXRSServerCodegen {
     //---- Fields
 
     private Map<String, Model> models;
+    protected String shortAppName;
 
 
     //---- Methods
@@ -145,7 +151,7 @@ public class InventageJavaCodegen extends AbstractJavaJAXRSServerCodegen {
     public void preprocessSwagger(Swagger swagger) {
         super.preprocessSwagger(swagger);
 
-        final String shortAppName = GeneratorUtils.extractShortAppName(additionalProperties, swagger);
+        shortAppName = GeneratorUtils.extractShortAppName(additionalProperties, swagger);
 
         final String apiFolder = sourceFolder + File.separator + apiPackage.replace('.', '/');
         if (JAX_RS.equals(getLibrary())) {
