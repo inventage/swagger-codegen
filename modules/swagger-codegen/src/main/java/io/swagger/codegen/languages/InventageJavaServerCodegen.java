@@ -1,14 +1,19 @@
 package io.swagger.codegen.languages;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import io.swagger.codegen.*;
 import io.swagger.codegen.utils.GeneratorUtils;
 import io.swagger.models.Model;
 import io.swagger.models.Operation;
+import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
 import io.swagger.util.Json;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +39,27 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
 
     protected static final String JAX_RS = "jax-rs";
     protected static final String SPRING = "spring";
+    protected static final Set<String> JAVA_PRIMITIVES = ImmutableSet.of(
+            "String",
+            "Boolean",
+            "Double",
+            "Integer",
+            "Long",
+            "Float"
+    );
+    protected static final Set<String> PRIMITIVE_WRAPPING_VENDOR_EXTENSIONS = ImmutableSet.of(
+            "ref",
+            "complexType",
+            "enumeration"
+    );
+    protected static final Map<String, String> ACCENT_REPLACEMENTS = ImmutableMap.<String, String>builder()
+            .put("ä", "ae")
+            .put("ö", "oe")
+            .put("ü", "ue")
+            .put("Ä", "Ae")
+            .put("Ö", "Oe")
+            .put("Ü", "Ue")
+            .build();
 
 
     //---- Constructor
@@ -304,9 +330,15 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
         final boolean isInt = property.isInteger || property.isLong;
         if (property.minimum != null) {
             model.imports.add(isInt ? "Min" : "DecimalMin");
+            if (property.minimum.length() >= 10) {
+                property.minimum += "L";
+            }
         }
         if (property.maximum != null) {
             model.imports.add(isInt ? "Max" : "DecimalMax");
+            if (property.maximum.length() >= 10) {
+                property.maximum += "L";
+            }
         }
 
         if (property.required) {
@@ -340,25 +372,45 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
 
     /** {@inheritDoc} */
     @Override
-    public Map<String, Object> postProcessModelsEnum(Map<String, Object> objs) {
-        objs = super.postProcessModelsEnum(objs);
-        //Needed import for Gson based libraries
-        if (additionalProperties.containsKey("gson")) {
-            final List<Map<String, String>> imports = (List<Map<String, String>>) objs.get("imports");
-            final List<Object> models = (List<Object>) objs.get("models");
-            for (Object _mo : models) {
-                final Map<String, Object> mo = (Map<String, Object>) _mo;
-                final CodegenModel cm = (CodegenModel) mo.get("model");
-                // for enum model
-                if (Boolean.TRUE.equals(cm.isEnum) && cm.allowableValues != null) {
-                    cm.imports.add(importMapping.get("SerializedName"));
-                    final Map<String, String> item = new HashMap<String, String>();
-                    item.put("import", importMapping.get("SerializedName"));
-                    imports.add(item);
-                }
-            }
+    public CodegenOperation fromOperation(final String path, final String httpMethod, final Operation operation, final Map<String, Model> definitions, final Swagger swagger) {
+        final CodegenOperation codegenOperation = super.fromOperation(path, httpMethod, operation, definitions, swagger);
+
+        // Convert aliases of primitive types
+        Optional.ofNullable(findMethodResponse(operation.getResponses()))
+                .map(Response::getSchema)
+                .filter(schema -> schema instanceof RefProperty)
+                .map(RefProperty.class::cast)
+                .map(RefProperty::getSimpleRef)
+                .map(definitions::get)
+                .map(model -> fromModel("response", model, definitions))
+                .filter(model -> PRIMITIVE_WRAPPING_VENDOR_EXTENSIONS.stream().noneMatch(model.vendorExtensions::containsKey))
+                .filter(model -> JAVA_PRIMITIVES.contains(model.dataType))
+                .ifPresent(model -> {
+                    codegenOperation.returnType = model.dataType;
+                    codegenOperation.returnBaseType = model.dataType;
+                    codegenOperation.returnSimpleType = true;
+                    codegenOperation.returnTypeIsPrimitive = true;
+                });
+
+        return codegenOperation;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String sanitizeName(final String name) {
+        String preSanitizedName = name;
+
+        for (final Map.Entry<String, String> accentReplacement : ACCENT_REPLACEMENTS.entrySet()) {
+            preSanitizedName = preSanitizedName.replace(accentReplacement.getKey(), accentReplacement.getValue());
         }
-        return objs;
+
+        preSanitizedName = StringUtils.stripAccents(preSanitizedName);
+
+        if (!preSanitizedName.equals(name)) {
+            LOG.info(preSanitizedName);
+        }
+
+        return super.sanitizeName(preSanitizedName);
     }
 
     /** {@inheritDoc} */
