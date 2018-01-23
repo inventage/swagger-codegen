@@ -386,6 +386,7 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
                 .filter(model -> PRIMITIVE_WRAPPING_VENDOR_EXTENSIONS.stream().noneMatch(model.vendorExtensions::containsKey))
                 .filter(model -> JAVA_PRIMITIVES.contains(model.dataType))
                 .ifPresent(model -> {
+                    codegenOperation.imports.remove(codegenOperation.returnType);
                     codegenOperation.returnType = model.dataType;
                     codegenOperation.returnBaseType = model.dataType;
                     codegenOperation.returnSimpleType = true;
