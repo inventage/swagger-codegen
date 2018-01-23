@@ -378,13 +378,7 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
         // Convert aliases of primitive types
         Optional.ofNullable(findMethodResponse(operation.getResponses()))
                 .map(Response::getSchema)
-                .filter(schema -> schema instanceof RefProperty)
-                .map(RefProperty.class::cast)
-                .map(RefProperty::getSimpleRef)
-                .map(definitions::get)
-                .map(model -> fromModel("response", model, definitions))
-                .filter(model -> PRIMITIVE_WRAPPING_VENDOR_EXTENSIONS.stream().noneMatch(model.vendorExtensions::containsKey))
-                .filter(model -> JAVA_PRIMITIVES.contains(model.dataType))
+                .flatMap(this::dereferencePrimitiveType)
                 .ifPresent(model -> {
                     codegenOperation.imports.remove(codegenOperation.returnType);
                     codegenOperation.returnType = model.dataType;
@@ -394,6 +388,38 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
                 });
 
         return codegenOperation;
+    }
+
+    private Optional<CodegenModel> dereferencePrimitiveType(Property property) {
+        return Optional.ofNullable(property)
+                .filter(schema -> schema instanceof RefProperty)
+                .map(RefProperty.class::cast)
+                .map(RefProperty::getSimpleRef)
+                .map(models::get)
+                .map(model -> fromModel("response", model, models))
+                .filter(model -> PRIMITIVE_WRAPPING_VENDOR_EXTENSIONS.stream().noneMatch(model.vendorExtensions::containsKey))
+                .filter(model -> JAVA_PRIMITIVES.contains(model.dataType));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public CodegenProperty fromProperty(final String name, final Property property) {
+        final CodegenProperty codegenProperty = super.fromProperty(name, property);
+
+        if (property instanceof ArrayProperty && codegenProperty.isListContainer) {
+            final ArrayProperty arrayProperty = (ArrayProperty) property;
+            dereferencePrimitiveType(arrayProperty.getItems())
+                    .ifPresent(model -> {
+                        codegenProperty.datatype =  "List<" + model.dataType + ">";
+                        codegenProperty.datatypeWithEnum =  "List<" + model.dataType + ">";
+                        codegenProperty.complexType = model.dataType;
+                        codegenProperty.items.datatype = model.dataType;
+                        codegenProperty.items.datatypeWithEnum = model.dataType;
+                        codegenProperty.items.complexType = model.dataType;
+                    });
+        }
+
+        return codegenProperty;
     }
 
     /** {@inheritDoc} */
@@ -406,10 +432,6 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
         }
 
         preSanitizedName = StringUtils.stripAccents(preSanitizedName);
-
-        if (!preSanitizedName.equals(name)) {
-            LOG.info(preSanitizedName);
-        }
 
         return super.sanitizeName(preSanitizedName);
     }
