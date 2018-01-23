@@ -485,6 +485,10 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
 
     private void importsForParamValidation(List<CodegenParameter> params, List<LinkedHashMap> imports) {
         for (final CodegenParameter param : params) {
+            if (param.isEnum) {
+                addImport("JsonValue", imports);
+            }
+
             if (param.pattern != null) {
                 addImport("Pattern", imports);
             }

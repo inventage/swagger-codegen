@@ -43,6 +43,22 @@ public interface {{shortAppName}}Client {
 {{/if}}
     public {{#if returnType}}{{{returnType}}}{{else}}void{{/if}} {{operationId}}({{> params annotated=true types=true}});
 
+{{#each headerParams}}
+    {{# if isEnum}}
+{{>paramInnerEnum}}
+    {{/if}}
 {{/each}}
+{{#each pathParams}}
+    {{# if isEnum}}
+{{>paramInnerEnum}}
+    {{/if}}
+{{/each}}
+{{#each queryParams}}
+    {{# if isEnum}}
+{{>paramInnerEnum}}
+    {{/if}}
+{{/each}}
+{{/each}}
+
 {{/with}}
 }
