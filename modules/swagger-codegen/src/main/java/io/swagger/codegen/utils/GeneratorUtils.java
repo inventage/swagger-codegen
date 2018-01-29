@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static io.swagger.codegen.languages.InventageJavaServerCodegen.SERVICE_NAME;
 import static org.apache.commons.lang3.StringUtils.capitalize;
 
 /**
@@ -167,16 +168,24 @@ public final class GeneratorUtils {
     }
 
     /**
-     * Extracts the short app name {@code x-short-name} from the swagger definition and stores it as an additional property.
+     * Extracts the short app name from the swagger definition or the additional properties and stores it as an additional property.
      *
-     * <p>If the {@code x-short-name} is not present in the Swagger definition's {@code info} section, the {@code title} is used instead.</p>
+     * <p>The following definitions are checked in order and the first valid one is returned:</p>
+     * <ul>
+     *     <li>{@code serviceName} property</li>
+     *     <li>{@code x-short-name} attribute in the Swagger definition's {@code info} section</li>
+     *     <li>{@code title} attribute in the Swagger definition's {@code info} section</li>
+     * </ul>
      *
      * @param additionalProperties additional properties of the swagger code generator
      * @param swagger Swagger definition
      * @return the short app name
      */
     public static String extractShortAppName(Map<String, Object> additionalProperties, Swagger swagger) {
-        final Object configuredShortAppName = swagger.getInfo().getVendorExtensions().get("x-short-name");
+        final Object configuredShortAppName = additionalProperties.getOrDefault(SERVICE_NAME,
+                swagger.getInfo().getVendorExtensions().get("x-short-name")
+        );
+
         final String serviceEndpointName;
         if (configuredShortAppName instanceof String) {
             serviceEndpointName = camelizeSpacedString((String) configuredShortAppName);

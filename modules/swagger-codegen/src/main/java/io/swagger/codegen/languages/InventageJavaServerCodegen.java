@@ -23,6 +23,7 @@ import java.util.*;
 import static io.swagger.codegen.utils.GeneratorUtils.*;
 import static java.lang.Character.isUpperCase;
 import static java.lang.Math.abs;
+import static java.util.Arrays.stream;
 
 
 /**
@@ -61,6 +62,9 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
             .put("Ü", "Ue")
             .build();
 
+    private static final String OPERATION_NAMING = "operationNaming";
+    public static final String SERVICE_NAME = "serviceName";
+
 
     //---- Constructor
 
@@ -83,6 +87,13 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
         libraryOption.setEnum(supportedLibraries);
         libraryOption.setDefault(JAX_RS);
         cliOptions.add(libraryOption);
+
+        cliOptions.add(CliOption.newString(OPERATION_NAMING, "Naming strategy for operations")
+            .addEnum(NamingStrategy.AUTO.name(), "Automatically chose a strategy based on the available information")
+            .addEnum(NamingStrategy.PATH.name(), "Build a name based on the operation's path")
+            .defaultValue(NamingStrategy.AUTO.name()));
+
+        cliOptions.add(CliOption.newBoolean(SERVICE_NAME, "Custom API name used for class names"));
     }
 
 
@@ -90,6 +101,7 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
 
     private Map<String, Model> models;
     protected String shortAppName;
+    protected NamingStrategy operationNaming;
 
 
     //---- Methods
@@ -135,6 +147,8 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
         else if (SPRING.equals(getLibrary())) {
             additionalProperties.put("spring", "true");
         }
+
+        operationNaming = NamingStrategy.from(additionalProperties.get("operationNaming"));
 
         additionalProperties.put("jackson", "true");
         additionalProperties.put("useBeanValidation", "true");
@@ -372,6 +386,16 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
 
     /** {@inheritDoc} */
     @Override
+    public String getOrGenerateOperationId(Operation operation, String path, String httpMethod) {
+        if (operationNaming == NamingStrategy.PATH) {
+            operation.setOperationId(null);
+        }
+
+        return super.getOrGenerateOperationId(operation, path, httpMethod);
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public CodegenOperation fromOperation(final String path, final String httpMethod, final Operation operation, final Map<String, Model> definitions, final Swagger swagger) {
         final CodegenOperation codegenOperation = super.fromOperation(path, httpMethod, operation, definitions, swagger);
 
@@ -554,6 +578,22 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
             }
         }
         return false;
+    }
+
+    private enum NamingStrategy {
+        AUTO,
+        PATH;
+
+        public static NamingStrategy from(final Object value) {
+            if (value == null) {
+                return AUTO;
+            }
+
+            return stream(values())
+                    .filter(strategy -> strategy.name().equalsIgnoreCase(value.toString()))
+                    .findAny()
+                    .orElse(AUTO);
+        }
     }
 
 }
