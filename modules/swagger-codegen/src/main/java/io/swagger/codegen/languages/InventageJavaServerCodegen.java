@@ -4,10 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.swagger.codegen.*;
 import io.swagger.codegen.utils.GeneratorUtils;
-import io.swagger.models.Model;
-import io.swagger.models.Operation;
-import io.swagger.models.Response;
-import io.swagger.models.Swagger;
+import io.swagger.models.*;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.Property;
@@ -49,9 +46,9 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
             "Float"
     );
     protected static final Set<String> PRIMITIVE_WRAPPING_VENDOR_EXTENSIONS = ImmutableSet.of(
-            "ref",
-            "complexType",
-            "enumeration"
+            "x-ref",
+            "x-complexType",
+            "x-enumeration"
     );
     protected static final Map<String, String> ACCENT_REPLACEMENTS = ImmutableMap.<String, String>builder()
             .put("ä", "ae")
@@ -64,6 +61,33 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
 
     private static final String OPERATION_NAMING = "operationNaming";
     public static final String SERVICE_NAME = "serviceName";
+
+    /**
+     * Determine all of the types in the model definitions that are aliases of
+     * simple types.
+     *
+     * @param allDefinitions  the complete set of model definitions
+     * @return a mapping from model name to type alias
+     */
+    private static Map<String, String> getAllAliases(Map<String, Model> allDefinitions) {
+        Map<String, String> aliases = new HashMap<>();
+        if (allDefinitions != null) {
+            for (Map.Entry<String, Model> entry : allDefinitions.entrySet()) {
+                String swaggerName = entry.getKey();
+                Model m = entry.getValue();
+                if (m instanceof ModelImpl) {
+                    ModelImpl impl = (ModelImpl) m;
+                    if (impl.getType() != null &&
+                            !impl.getType().equals("object") &&
+                            impl.getEnum() == null &&
+                            PRIMITIVE_WRAPPING_VENDOR_EXTENSIONS.stream().noneMatch(key -> impl.getVendorExtensions().containsKey(key))) {
+                        aliases.put(swaggerName, impl.getType());
+                    }
+                }
+            }
+        }
+        return aliases;
+    }
 
 
     //---- Constructor
@@ -122,12 +146,6 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
     @Override
     public String getHelp() {
         return "Generates a JAX-RS server stub.";
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String getAlias(String name) {
-        return name;
     }
 
     /** {@inheritDoc} */
@@ -231,6 +249,10 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
     /** {@inheritDoc} */
     @Override
     public CodegenModel fromModel(String name, Model model, Map<String, Model> allDefinitions) {
+        if (typeAliases == null) {
+            typeAliases = getAllAliases(allDefinitions);
+        }
+
         final CodegenModel codegenModel = super.fromModel(name, model, allDefinitions);
 
         codegenModel.imports.remove("ApiModelProperty");
