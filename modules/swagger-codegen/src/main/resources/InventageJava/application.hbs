@@ -1,6 +1,7 @@
 package {{apiPackage}};
 
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.union;
 
 import javax.annotation.Generated;
 import javax.enterprise.context.ApplicationScoped;
@@ -13,7 +14,7 @@ import java.util.Set;
 {{/imports}}
 
 /**
- * {{appName}} JAX-RS application.
+ * {{appName}} base JAX-RS application.
  *
  * <p>To function correctly, the following resource interfaces
  * need to be implemented:</p>
@@ -25,31 +26,46 @@ import java.util.Set;
 {{/apiInfo}}
  * </ul>
  *
- * <p>The {@code {{shortAppName}}ApplicationImplementationsTest} ensures, that at least one implementation of each of these interfaces is available.</p>
- *
  * @author Simon Marti
  */
 @Generated("swagger-codegen")
-@ApplicationScoped
-@ApplicationPath("{{#if contextPath}}{{contextPath}}{{else}}/{{/if}}")
-public class {{shortAppName}}Application extends Application {
+public abstract class Abstract{{shortAppName}}Application extends Application {
+
+    //---- Static
+
+    protected static final String APPLICATION_PATH = "{{#if contextPath}}{{contextPath}}{{else}}/{{/if}}";
+
 
     //---- Methods
 
+    /**
+     * Get a set of additional resource, provider and {@link Feature feature} classes.
+     *
+     * The default life-cycle for resource class instances is per-request. The default
+     * life-cycle for providers (registered directly or via a feature) is singleton.
+     *
+     * @return a set of additional root resource and provider classes; must not be {@code null}
+     */
+    protected abstract Set<Class<?>> getAdditionalClasses();
+
+    /** {@inheritDoc} */
     @Override
     public Set<Class<?>> getClasses() {
-        return newHashSet(
-            // Application resources
-    {{#apiInfo}}
-        {{#apis}}
-            {{classname}}Adapter.class{{#unless @last}},{{/unless}}
-        {{/apis}}
-    {{/apiInfo}}
-{{#unless swaggerFileApplication}}
+        return union(
+            newHashSet(
+                // Application resources
+        {{#apiInfo}}
+            {{#apis}}
+                {{classname}}Adapter.class{{#unless @last}},{{/unless}}
+            {{/apis}}
+        {{/apiInfo}}
+        {{#unless swaggerFileApplication}}
 
-    // Swagger file resource
-    configuration.addResource(SwaggerFileResource.class);
-{{/unless}}
+                // Swagger file resource
+                configuration.addResource(SwaggerFileResource.class);
+        {{/unless}}
+            ),
+            getAdditionalClasses()
         );
     }
 

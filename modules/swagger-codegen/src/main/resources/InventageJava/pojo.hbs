@@ -1,9 +1,7 @@
 {{#if discriminator}}
 {{>typeInfoAnnotation}}
 {{/if}}
-{{#if vendorExtensions.x-cssv-validation-instrument-id~}}
-    @com.juliusbaer.costandcharge.cssv.validation.constraints.ValidCssvInstrumentId
-{{/if}}
+@Generated("swagger-codegen")
 public class {{classname}} {{#if parent}}extends {{{parent}}} {{/if}}{{#if serializableModel}}implements Serializable, Cloneable {{/if}}{
 
     //---- Static

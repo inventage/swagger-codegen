@@ -20,6 +20,7 @@ import java.util.*;
 import static io.swagger.codegen.utils.GeneratorUtils.*;
 import static java.lang.Character.isUpperCase;
 import static java.lang.Math.abs;
+import static java.lang.String.format;
 import static java.util.Arrays.stream;
 
 
@@ -213,7 +214,7 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
 
         final String apiFolder = sourceFolder + File.separator + apiPackage.replace('.', '/');
         if (JAX_RS.equals(getLibrary())) {
-            supportingFiles.add(new SupportingFile("application", apiFolder, shortAppName + "Application.java"));
+            supportingFiles.add(new SupportingFile("application", apiFolder, format("Abstract%sApplication.java", shortAppName)));
         }
 
         additionalProperties.put("swaggerFileApplication", true);

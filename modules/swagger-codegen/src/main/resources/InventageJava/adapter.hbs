@@ -12,6 +12,7 @@ import java.util.List;
 {{#with operations}}
 {{#each operation}}
 
+import javax.annotation.Generated;
 {{#if jaxrs}}
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -60,6 +61,7 @@ import org.springframework.validation.annotation.Validated;
 @Controller
 @RequestMapping(value = "{{#if contextPath}}{{contextPath}}{{/if}}")
 {{/if}}
+@Generated("swagger-codegen")
 public class {{classname}}Adapter {
 
     //---- Fields
