@@ -1,6 +1,8 @@
     {{! Pattern }}
     {{#if pattern}}
+        {{#unless isByteArray}}
     @Pattern(regexp = "{{pattern}}")
+        {{/unless}}
     {{/if}}
     {{! Size }}
     {{#if minLength}}
