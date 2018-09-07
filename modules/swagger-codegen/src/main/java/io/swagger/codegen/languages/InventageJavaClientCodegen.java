@@ -60,4 +60,10 @@ public class InventageJavaClientCodegen extends InventageJavaServerCodegen {
         return JAX_RS;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public String toBooleanGetter(final String name) {
+        return super.toGetter(name);
+    }
+
 }
