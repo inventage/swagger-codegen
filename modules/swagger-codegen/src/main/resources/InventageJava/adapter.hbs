@@ -24,6 +24,9 @@ import javax.ws.rs.PathParam;
     {{#if hasQueryParams}}
 import javax.ws.rs.QueryParam;
     {{/if}}
+    {{#if hasHeaderParams}}
+import javax.ws.rs.HeaderParam;
+    {{/if}}
 import javax.ws.rs.Produces;
 {{/if}}
 {{#if spring}}
