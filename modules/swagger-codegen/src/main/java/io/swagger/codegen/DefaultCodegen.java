@@ -2133,6 +2133,10 @@ public class DefaultCodegen {
                 if (Boolean.TRUE.equals(r.isFile) && Boolean.TRUE.equals(r.isDefault)){
                     op.isResponseFile = Boolean.TRUE;
                 }
+
+                if (response == methodResponse) {
+                    op.statusCode = entry.getKey();
+                }
             }
             op.responses.get(op.responses.size() - 1).hasMore = false;
 

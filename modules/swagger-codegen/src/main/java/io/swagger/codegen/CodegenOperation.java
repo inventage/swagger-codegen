@@ -1,14 +1,14 @@
 package io.swagger.codegen;
 
-import io.swagger.models.ExternalDocs;
-import io.swagger.models.Tag;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Arrays;
+
+import io.swagger.models.ExternalDocs;
+import io.swagger.models.Tag;
 
 public class CodegenOperation {
     public final List<CodegenProperty> responseHeaders = new ArrayList<CodegenProperty>();
@@ -41,6 +41,7 @@ public class CodegenOperation {
     public String operationIdLowerCase; // for markdown documentation
     public String operationIdCamelCase; // for class names
     public String operationIdSnakeCase;
+    public String statusCode;
 
     /**
      * Check if there's at least one parameter
