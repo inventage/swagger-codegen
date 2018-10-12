@@ -501,6 +501,7 @@ public class InventageJavaServerCodegen extends AbstractJavaJAXRSServerCodegen {
                 importsForParamValidation(operation.pathParams, imports);
                 importsForParamValidation(operation.queryParams, imports);
                 importsForParamValidation(operation.bodyParams, imports);
+                importsForParamValidation(operation.headerParams, imports);
             }
         }
 
