@@ -4,16 +4,16 @@
 {{~#if hasPathParams ~}}
     {{#if hasQueryParams ~}}, {{/if}}
     {{~#unless hasQueryParams ~}}
-        {{#if hasHeaderParams}}{{#unless additionalProperties.skipHeaderParams}}, {{/unless}}{{/if}}
+        {{#if hasHeaderParams}}{{#unless skipHeaderParams}}, {{/unless}}{{/if}}
     {{~/unless~}}
 {{~/if}}
 {{~#each queryParams ~}}
 {{>queryParams}}{{#unless @last}}, {{/unless}}
 {{~/each}}
 {{~#if hasQueryParams ~}}
-    {{#if hasHeaderParams}}{{#unless additionalProperties.skipHeaderParams}}, {{/unless}}{{/if}}
+    {{#if hasHeaderParams}}{{#unless skipHeaderParams}}, {{/unless}}{{/if}}
 {{~/if}}
-{{~#unless additionalProperties.skipHeaderParams ~}}
+{{~#unless skipHeaderParams ~}}
 {{~#each headerParams ~}}
 {{>headerParams}}{{#unless @last}}, {{/unless}}
 {{~/each}}
@@ -23,7 +23,7 @@
     {{#unless hasQueryParams ~}}
         {{#if hasPathParams}}, {{/if}}
         {{~#unless hasPathParams ~}}
-            {{#if hasHeaderParams}}{{#unless additionalProperties.skipHeaderParams}}, {{/unless}}{{/if}}
+            {{#if hasHeaderParams}}{{#unless skipHeaderParams}}, {{/unless}}{{/if}}
         {{~/unless~}}
     {{~/unless~}}
     {{#with bodyParam}}
